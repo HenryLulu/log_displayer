@@ -11,5 +11,6 @@ router.post('/test',function(req,res){
     res.json({});
 })
 router.post('/get_service_state',summary.last_day)
+router.post('/find_service_state',summary.find)
 
 module.exports = router

@@ -31,7 +31,7 @@ function connect_mongo(res,callback){
     }
 }
 
-last_day = function(req,res){
+var last_day = function(req,res){
     connect_mongo(res,function(db){
         db.collection('log_table',function(err,tb){
             if(!err){
@@ -49,7 +49,7 @@ last_day = function(req,res){
                         if(fs.exists(config.sum_dir+'summary.tmp')){
                             res.json({
                                 ErrNo:"103",
-                                ErrMsg:"some file is writing,please wait"
+                                ErrMsg:"some file is writing,please try later"
                             })
                         }
                         var f = fs.createWriteStream(config.sum_dir+'summary.tmp', {'flags': 'a'});
@@ -82,4 +82,70 @@ last_day = function(req,res){
     })
 }
 
+var find = function(req,res){
+    var start = +req.body.start||null;
+    var end = +req.body.end||null;
+    var ips = req.body.ips?req.body.ips.split(","):[];
+    var server_n = ips.length>0?ips.length:config.server_num;
+    if(!(start&&end)){
+        res.json({
+            ErrNo:"200",
+            ErrMsg:"参数有误"
+        })
+    }else if((end-start)*server_n>50000000){
+        res.json({
+            ErrNo:"201",
+            ErrMsg:"请求数据量过大"
+        })
+    }
+
+    connect_mongo(res,function(db){
+        db.collection('log_table',function(err,tb){
+            if(!err){
+                var now = new Date()
+                var query = {
+                    'start':{
+                        '$gte':start,
+                        '$lt':end
+                    }
+                }
+                if(ips){
+                    query['s_ip'] = {
+                        '$in':ips
+                    }
+                }
+                console.log(query)
+                tb.find(query).toArray(function(err,logs){
+                    if(!err){
+                        var f = fs.createWriteStream(config.sum_dir+'summary', {'flags': 'w'});
+                        var now = new Date().getTime()
+                        //var j = 0
+                        //while(j<1000){
+                        //j++
+                        for(var i in logs){
+                            f.write(logs[i].start+" "+logs[i].s_ip+" "+logs[i].band+" "+logs[i].jam_r+" "+logs[i].suc_r+" "+logs[i].rate_a+"\n")
+                        }
+                        //}
+                        f.end()
+                        //fs.rename(config.sum_dir+'summary.tmp',config.sum_dir+'summary')
+                        res.redirect("/files/summary")
+                    }else{
+                        res.json({
+                            ErrNo:"102",
+                            ErrMsg:"Failed to get logs"
+                        })
+                    }
+                })
+            }else{
+                res.json({
+                    ErrNo:"101",
+                    ErrMsg:"Failed to get table"
+                })
+            }
+        })
+    })
+
+}
+
 exports.last_day = last_day
+exports.find = find
