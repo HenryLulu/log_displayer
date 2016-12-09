@@ -7,7 +7,6 @@ var fs = require('fs');
 var config = require("../common/config");
 
 function connect_mongo(res,callback){
-    try{
         var server = new mongo.Server(config.mongo_addr,config.mongo_port);
         var db = new mongo.Db('log_db',server,{safe:true});
         db.open(function(err){
@@ -20,15 +19,6 @@ function connect_mongo(res,callback){
                 })
             }
         })
-    }
-    catch(e){
-        console.log(e)
-        res.json({
-            ErrNo:"100",
-            ErrMsg:"Failed to connect database"
-        })
-        return 0
-    }
 }
 
 var last_day = function(req,res){
@@ -92,58 +82,67 @@ var find = function(req,res){
             ErrNo:"200",
             ErrMsg:"参数有误"
         })
+        return
     }else if((end-start)*server_n>50000000){
         res.json({
             ErrNo:"201",
             ErrMsg:"请求数据量过大"
         })
+        return
+    }
+    try{
+        connect_mongo(res,function(db){
+            db.collection('log_table',function(err,tb){
+                if(!err){
+                    var now = new Date()
+                    var query = {
+                        'start':{
+                            '$gte':start,
+                            '$lt':end
+                        }
+                    }
+                    if(ips&&ips.length>0){
+                        query['s_ip'] = {
+                            '$in':ips
+                        }
+                    }
+                    console.log(query)
+                    tb.find(query).toArray(function(err,logs){
+                        if(!err){
+                            var f = fs.createWriteStream(config.sum_dir+'summary', {'flags': 'w'});
+                            var now = new Date().getTime()
+                            //var j = 0
+                            //while(j<1000){
+                            //j++
+                            for(var i in logs){
+                                f.write(logs[i].start+" "+logs[i].s_ip+" "+logs[i].band+" "+logs[i].jam_r+" "+logs[i].suc_r+" "+logs[i].rate_a+"\n")
+                            }
+                            //}
+                            f.end()
+                            //fs.rename(config.sum_dir+'summary.tmp',config.sum_dir+'summary')
+                            res.redirect("/files/summary")
+                        }else{
+                            res.json({
+                                ErrNo:"102",
+                                ErrMsg:"Failed to get logs"
+                            })
+                        }
+                    })
+                }else{
+                    res.json({
+                        ErrNo:"101",
+                        ErrMsg:"Failed to get table"
+                    })
+                }
+            })
+        })
+    }catch(e){
+        res.json({
+            ErrNo:"100",
+            ErrMsg:"数据库错误"
+        })
     }
 
-    connect_mongo(res,function(db){
-        db.collection('log_table',function(err,tb){
-            if(!err){
-                var now = new Date()
-                var query = {
-                    'start':{
-                        '$gte':start,
-                        '$lt':end
-                    }
-                }
-                if(ips){
-                    query['s_ip'] = {
-                        '$in':ips
-                    }
-                }
-                console.log(query)
-                tb.find(query).toArray(function(err,logs){
-                    if(!err){
-                        var f = fs.createWriteStream(config.sum_dir+'summary', {'flags': 'w'});
-                        var now = new Date().getTime()
-                        //var j = 0
-                        //while(j<1000){
-                        //j++
-                        for(var i in logs){
-                            f.write(logs[i].start+" "+logs[i].s_ip+" "+logs[i].band+" "+logs[i].jam_r+" "+logs[i].suc_r+" "+logs[i].rate_a+"\n")
-                        }
-                        //}
-                        f.end()
-                        //fs.rename(config.sum_dir+'summary.tmp',config.sum_dir+'summary')
-                        res.redirect("/files/summary")
-                    }else{
-                        res.json({
-                            ErrNo:"102",
-                            ErrMsg:"Failed to get logs"
-                        })
-                    }
-                })
-            }else{
-                res.json({
-                    ErrNo:"101",
-                    ErrMsg:"Failed to get table"
-                })
-            }
-        })
-    })
 
 }
 
