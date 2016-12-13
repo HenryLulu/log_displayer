@@ -5,3 +5,5 @@ summary
 fabfile.*
 .gitignore
 files/
+logs/
+.DS_Store
