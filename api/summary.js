@@ -7,18 +7,18 @@ var fs = require('fs');
 var config = require("../common/config");
 
 function connect_mongo(res,callback){
-        var server = new mongo.Server(config.mongo_addr,config.mongo_port);
-        var db = new mongo.Db('log_db',server,{safe:true});
-        db.open(function(err){
+    var MongoClient = require('mongodb').MongoClient;
+    MongoClient.connect(config.mongo_addr,config.mongo_option, function (err, db) {
             if(!err){
                 callback(db)
             }else{
+                console.log(err)
                 res.json({
                     ErrNo:"100",
                     ErrMsg:"Failed to connect database"
                 })
             }
-        })
+    })
 }
 
 var last_day = function(req,res){
