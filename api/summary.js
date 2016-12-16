@@ -156,7 +156,7 @@ var last_five = function(req,res){
                         new Date(five_ago.getFullYear(),five_ago.getMonth(),five_ago.getDate(),five_ago.getHours(),
                         parseInt(five_ago.getMinutes()/5)*5,0).getTime()/1000
                     )
-                    console.log(start)
+                    //console.log(start)
 
                     var query = {
                         'start':start
