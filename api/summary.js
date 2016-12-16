@@ -73,6 +73,4 @@ var last_five = function(req,res){
 
 }
 
-exports.last_day = last_day
-exports.find = find
 exports.last_five = last_five
