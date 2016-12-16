@@ -11,5 +11,6 @@ router.post('/test',function(req,res){
     res.json({});
 })
 router.post('/last_five_minutes',summary.last_five)
+router.get('/complete_ips',summary.complete)
 
 module.exports = router
