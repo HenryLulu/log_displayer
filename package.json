@@ -11,6 +11,8 @@
   "dependencies": {
     "body-parser": "^1.15.2",
     "express": "^4.14.0",
-    "mongodb": "^2.2.13"
+    "log4js": "^1.0.1",
+    "mongodb": "^2.2.13",
+    "pm2": "^2.2.2"
   }
 }
