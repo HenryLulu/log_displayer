@@ -40,8 +40,8 @@ var last_five = function(req,res){
                         start:1,
                         s_ip:1,
                         band:1,
-                        freeze_r:1,
                         suc_r:1,
+                        freeze_r:1,
                         bitrate:1,
                         _id:0
                     }
