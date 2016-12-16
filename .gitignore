@@ -7,3 +7,4 @@ fabfile.*
 files/
 logs/
 .DS_Store
+public/

@@ -12,7 +12,7 @@ var api_router = require("./routers/api_router");
 
 log4js.configure({
     appenders: [
-        { type: 'console' },
+        //{ type: 'console' },
         {
             type: 'file', //文件输出
             filename: 'logs/access.log',
