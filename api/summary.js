@@ -92,7 +92,7 @@ var complete = function(req,res){
                     }
                     tb.find(query,back).toArray(function(err,logs){
                         if(!err){
-                            var ips = ""
+                            var ips = "[total:"+logs.length+"] </br>"
                             for(l in logs){
                                 ips += (logs[l].s_ip+"</br>")||""
                             }
