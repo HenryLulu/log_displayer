@@ -12,5 +12,7 @@ router.post('/test',function(req,res){
 })
 router.post('/last_five_minutes',summary.last_five)
 router.get('/complete_ips',summary.complete)
+router.post('/log_source',summary.log_source)
+router.post('/user_source',summary.user_source)
 
 module.exports = router

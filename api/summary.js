@@ -2,7 +2,6 @@
  * Created by Henry on 16/12/7.
  */
 var mongo = require("mongodb");
-var fs = require('fs');
 
 var config = require("../common/config");
 
@@ -120,5 +119,46 @@ var complete = function(req,res){
     }
 }
 
+var log_s = function(req,res){
+    try{
+        connect_mongo(res,function(db){
+            db.collection('log_table',function(err,tb){
+                if(!err){
+                    res.send("0")
+                }else{
+                    res.send("101")
+                }
+            })
+        })
+    }catch(e){
+        res.send("100")
+    }}
+
+var user_s = function(req,res){
+    try{
+        connect_mongo(res,function(db){
+            db.collection('log_table',function(err,tb){
+                if(!err){
+                    res.json({
+                        ErrNo:"0"
+                    })
+                }else{
+                    res.json({
+                        ErrNo:"101",
+                        ErrMsg:"Failed to get table"
+                    })
+                }
+            })
+        })
+    }catch(e){
+        res.json({
+            ErrNo:"100",
+            ErrMsg:"数据库错误"
+        })
+    }}
+
+
 exports.last_five = last_five
 exports.complete = complete
+exports.log_source = log_s
+exports.user_source = user_s
