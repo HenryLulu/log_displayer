@@ -26,7 +26,6 @@ var logger = log4js.getLogger('normal');
 logger.setLevel('INFO');
 app.use(log4js.connectLogger(logger, {level:log4js.levels.INFO}));
 
-app.use(bodyParser.urlencoded({extended: true}));
 app.use(express.static(path.join(__dirname, 'public')));
 
 app.use("/pas",api_router)
