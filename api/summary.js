@@ -47,6 +47,7 @@ var last_five = function(req,res){
                     tb.find(query,back).toArray(function(err,logs){
                         if(!err){
                             res.json(logs)
+                            db.close()
                         }else{
                             res.json({
                                 ErrNo:"102",
@@ -91,6 +92,7 @@ var get_time = function(req,res){
                     tb.find(query,back).toArray(function(err,logs){
                         if(!err){
                             res.json(logs)
+                            db.close()
                         }else{
                             res.json({
                                 ErrNo:"102",
@@ -141,6 +143,7 @@ var complete = function(req,res){
                                 ips += (logs[l].s_ip+"</br>")||""
                             }
                             res.send(ips)
+                            db.close()
                         }else{
                             res.json({
                                 ErrNo:"102",
