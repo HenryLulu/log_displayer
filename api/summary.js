@@ -138,11 +138,21 @@ var complete = function(req,res){
                     }
                     tb.find(query,back).toArray(function(err,logs){
                         if(!err){
-                            var ips = "[total:"+logs.length+"] </br>"
-                            for(l in logs){
-                                ips += (logs[l].s_ip+"</br>")||""
+                            var all_ips = config.all_ips;
+                            var ips = ""
+                            for(var l in logs){
+                                logs[l].s_ip && (ips += (logs[l].s_ip+","))
                             }
-                            res.send(ips)
+                            var ip_list = "<p>[total:"+logs.length+"/"+all_ips.length+"]</p>";
+                            for(var i in all_ips){
+                                var current = all_ips[i];
+                                if(ips.indexOf(current)>=0){
+                                    ip_list += "<p style='color: green'>"+current+"</p>"
+                                }else{
+                                    ip_list += "<p style='color: red'>"+current+"</p>"
+                                }
+                            }
+                            res.send(ip_list)
                             db.close()
                         }else{
                             res.json({
