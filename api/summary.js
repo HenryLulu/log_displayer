@@ -138,21 +138,51 @@ var complete = function(req,res){
                     }
                     tb.find(query,back).toArray(function(err,logs){
                         if(!err){
-                            var all_ips = config.all_ips;
+                            var kw_ips = config.kuaiwang_ips;
+                            var dl_ips = config.dilian_ips;
+                            var ws_ips = config.wangsu_ips;
+                            var kw_num = 0;
+                            var dl_num = 0;
+                            var ws_num = 0;
+                            var current;
                             var ips = ""
                             for(var l in logs){
                                 logs[l].s_ip && (ips += (logs[l].s_ip+","))
                             }
-                            var ip_list = "<p>[total:"+logs.length+"/"+all_ips.length+"]</p>";
-                            for(var i in all_ips){
-                                var current = all_ips[i];
+                            var kw_list = ""
+                            for(var i in kw_ips){
+                                current = kw_ips[i];
                                 if(ips.indexOf(current)>=0){
-                                    ip_list += "<p style='color: green'>"+current+"</p>"
+                                    kw_list += "<p style='color: green'>"+current+"</p>"
+                                    kw_num ++;
                                 }else{
-                                    ip_list += "<p style='color: red'>"+current+"</p>"
+                                    kw_list += "<p style='color: red'>"+current+"</p>"
                                 }
                             }
-                            res.send(ip_list)
+                            kw_list = "<p>[KW total:"+kw_num+"/"+kw_ips.length+"]</p>" + kw_list;
+                            var dl_list = ""
+                            for(var j in dl_ips){
+                                current = dl_ips[j];
+                                if(ips.indexOf(current)>=0){
+                                    dl_list += "<p style='color: green'>"+current+"</p>"
+                                    dl_num ++;
+                                }else{
+                                    dl_list += "<p style='color: red'>"+current+"</p>"
+                                }
+                            }
+                            dl_list = "<p>[DL total:"+dl_num+"/"+dl_ips.length+"]</p>" + dl_list;
+                            var ws_list = ""
+                            for(var k in ws_ips){
+                                current = ws_ips[k];
+                                if(ips.indexOf(current)>=0){
+                                    ws_list += "<p style='color: green'>"+current+"</p>"
+                                    ws_num ++;
+                                }else{
+                                    ws_list += "<p style='color: red'>"+current+"</p>"
+                                }
+                            }
+                            ws_list = "<p>[WS total:"+ws_num+"/"+ws_ips.length+"]</p>" + ws_list;
+                            res.send(kw_list+"<p></p>"+dl_list+"<p></p>"+ws_list)
                             db.close()
                         }else{
                             res.json({
