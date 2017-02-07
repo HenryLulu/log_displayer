@@ -9,5 +9,6 @@ var summary = require('../api/summary')
 router.post('/last_five_minutes',summary.last_five)
 router.get('/complete_ips',summary.complete)
 router.get('/get_time',summary.get_time)
+router.get('/test',summary.test)
 
 module.exports = router
