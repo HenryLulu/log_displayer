@@ -77,7 +77,7 @@ var get_time = function(req,res){
         connect_mongo(res,function(db){
             db.collection('log_table',function(err,tb){
                 if(!err){
-                    var start = parseInt(req.params.time)
+                    var start = parseInt(req.query.time)
                     var query = {
                         'start':start
                     }
