@@ -77,11 +77,22 @@ var get_time = function(req,res){
         connect_mongo(res,function(db){
             db.collection('log_table',function(err,tb){
                 if(!err){
-                    var start = parseInt(req.query.time)
+                    //var start = parseInt(req.query.time)
+                    var time = req.query.time || "201701010000"
+                    var start = parseInt(new Date(
+                            parseInt(time.substring(0,4)),
+                            parseInt(time.substring(4,6))-1,
+                            parseInt(time.substring(6,8)),
+                            parseInt(time.substring(8,10)),
+                            parseInt(time.substring(10,12)),
+                            0
+                        ).getTime()/1000)
                     var query = {
                         'start':start
                     }
+                    req.query.sip && (query.s_ip = req.query.sip)
                     var back = {
+                        from:1,
                         start:1,
                         s_ip:1,
                         band:1,
