@@ -225,9 +225,79 @@ var test = function(req,res){
         res.send(ips)
     })
 }
+var cdn_band = function(req,res){
+    try{
+        connect_mongo(res,function(db){
+            db.collection('log_table',function(err,tb){
+                if(!err){
+                    var five_ago = new Date(new Date().getTime()-300000);
+                    var start = parseInt(
+                        new Date(five_ago.getFullYear(),five_ago.getMonth(),five_ago.getDate(),five_ago.getHours(),
+                            parseInt(five_ago.getMinutes()/5)*5,0).getTime()/1000
+                    )
+                    var query = {
+                        'start':start
+                    }
+                    var back = {
+                        from:1,
+                        start:1,
+                        band:1,
+                        _id:0
+                    }
+                    var band_collection = {
+                        "kw":0,
+                        "dl":0,
+                        "ws":0
+                    }
+                    tb.find(query,back).toArray(function(err,logs){
+                        if(!err){
+                            for(var l in logs){
+                                var log = logs[l];
+                                if(log.from&&log.band){
+                                    switch(log.from){
+                                        case 1:
+                                            band_collection.kw += parseInt(log.band);
+                                            break;
+                                        case 2:
+                                            band_collection.dl += parseInt(log.band);
+                                            break;
+                                        case 3:
+                                            band_collection.ws += parseInt(log.band);
+                                            break;
+                                    }
+                                }
+                            }
+                            var time = new Date((3600*8+start)*1000)
+                            band_collection.time = time.getHours()+":"+time.getMinutes()
+                            res.json(band_collection)
+                            db.close()
+                        }else{
+                            res.json({
+                                ErrNo:"102",
+                                ErrMsg:"Failed to get logs"
+                            })
+                        }
+                    })
+                }else{
+                    res.json({
+                        ErrNo:"101",
+                        ErrMsg:"Failed to get table"
+                    })
+                }
+            })
+        })
+    }catch(e){
+        res.json({
+            ErrNo:"100",
+            ErrMsg:"数据库错误"
+        })
+    }
+}
+
 
 
 exports.last_five = last_five
 exports.complete = complete
 exports.get_time = get_time
 exports.test = test
+exports.cdn_band = cdn_band
