@@ -230,11 +230,25 @@ var cdn_band = function(req,res){
         connect_mongo(res,function(db){
             db.collection('log_table',function(err,tb){
                 if(!err){
-                    var five_ago = new Date(new Date().getTime()-300000);
-                    var start = parseInt(
-                        new Date(five_ago.getFullYear(),five_ago.getMonth(),five_ago.getDate(),five_ago.getHours(),
-                            parseInt(five_ago.getMinutes()/5)*5,0).getTime()/1000
-                    )
+                    var start;
+                    if(req.query.time){
+                        var req_time = req.query.time
+                        start = parseInt(new Date(
+                                parseInt(req_time.substring(0,4)),
+                                parseInt(req_time.substring(4,6))-1,
+                                parseInt(req_time.substring(6,8)),
+                                parseInt(req_time.substring(8,10)),
+                                parseInt(req_time.substring(10,12)),
+                                0
+                            ).getTime()/1000-3600*8)
+                    }else{
+                        var five_ago = new Date(new Date().getTime()-300000);
+                        start = parseInt(
+                            new Date(five_ago.getFullYear(),five_ago.getMonth(),five_ago.getDate(),five_ago.getHours(),
+                                parseInt(five_ago.getMinutes()/5)*5,0).getTime()/1000
+                        )
+                    }
+
                     var query = {
                         'start':start
                     }
