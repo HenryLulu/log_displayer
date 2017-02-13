@@ -44,6 +44,7 @@ var get = function(cb){
             ws = []
         } else {
             ws = to_array(stdout)
+            ws = ws.concat(config.pbs_ips);
         }
     });
 
