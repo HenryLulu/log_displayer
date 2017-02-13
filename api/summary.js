@@ -2,6 +2,7 @@
  * Created by Henry on 16/12/7.
  */
 var mongo = require("mongodb");
+var moment = require("moment");
 
 var config = require("../common/config");
 var ips = require("../common/ips");
@@ -128,7 +129,6 @@ var get_time = function(req,res){
     }
 }
 
-
 var complete = function(req,res){
     ips.get(function(ip_obj){
         try{
@@ -221,8 +221,11 @@ var complete = function(req,res){
     })
 }
 var test = function(req,res){
-    ips.get(function(ips){
-        res.send(ips)
+    var datestr = moment().format('YYYYMMDD');
+    var date = moment(datestr,"YYYYMMDD");
+    res.send({
+        begin:date.startOf('day').unix(),
+        end:date.endOf('day').unix()
     })
 }
 var cdn_band = function(req,res){
@@ -319,29 +322,12 @@ var day_max = function(req,res){
         connect_mongo(res,function(db){
             db.collection('log_table',function(err,tb){
                 if(!err){
-
-
-                    var start;
-                    if(req.query.time){
-                        var req_time = req.query.time
-                        start = parseInt(new Date(
-                                parseInt(req_time.substring(0,4)),
-                                parseInt(req_time.substring(4,6))-1,
-                                parseInt(req_time.substring(6,8)),
-                                parseInt(req_time.substring(8,10)),
-                                parseInt(req_time.substring(10,12)),
-                                0
-                            ).getTime()/1000-3600*8)
-                    }else{
-                        var five_ago = new Date(new Date().getTime()-300000);
-                        start = parseInt(
-                            new Date(five_ago.getFullYear(),five_ago.getMonth(),five_ago.getDate(),five_ago.getHours(),
-                                parseInt(five_ago.getMinutes()/5)*5,0).getTime()/1000
-                        )
-                    }
-
+                    var date = moment(req.query.date || moment().format('YYYYMMDD'));
                     var query = {
-                        'start':start
+                        'start':{
+                            '$gte':date.startOf('day').unix(),
+                            '$lt':date.endOf('day').unix()
+                        }
                     }
                     var back = {
                         from:1,
@@ -350,12 +336,23 @@ var day_max = function(req,res){
                         _id:0
                     }
                     var band_collection = {
-                        "kw":0,
-                        "dl":0,
-                        "ws":0,
-                        "kwn":0,
-                        "dln":0,
-                        "wsn":0
+                        "kw":{},
+                        "dl":{},
+                        "ws":{}
+                    }
+                    var band_max = {
+                        kw:{
+                            band:0,
+                            time:""
+                        },
+                        dl:{
+                            band:0,
+                            time:""
+                        },
+                        ws:{
+                            band:0,
+                            time:""
+                        },
                     }
                     tb.find(query,back).toArray(function(err,logs){
                         if(!err){
@@ -364,23 +361,31 @@ var day_max = function(req,res){
                                 if(log.from&&log.band){
                                     switch(log.from){
                                         case 1:
-                                            band_collection.kw += parseInt(log.band);
-                                            band_collection.kwn += 1;
+                                            band_collection.kw[log.start] += parseInt(log.band);
                                             break;
                                         case 2:
-                                            band_collection.dl += parseInt(log.band);
-                                            band_collection.dln += 1;
+                                            band_collection.dl[log.start] += parseInt(log.band);
                                             break;
                                         case 3:
-                                            band_collection.ws += parseInt(log.band);
-                                            band_collection.wsn += 1;
+                                            band_collection.ws[log.start] += parseInt(log.band);
                                             break;
                                     }
                                 }
                             }
-                            var time = new Date((3600*8+start)*1000)
-                            band_collection.time = time.getHours()+":"+time.getMinutes()
-                            res.json(band_collection)
+                            console.log(band_collection.kw)
+                            for(var cdn in band_collection){
+                                var band_max = 0,time_max = ""
+                                var current_cdn = band_collection[cdn];
+                                for(var five_min in current_cdn){
+                                    if(current_cdn[five_min]>band_max[cdn]){
+                                        band_max = current_cdn[five_min];
+                                        time_max = five_min;
+                                    }
+                                }
+                                band_max[cdn].band = band_max;
+                                band_max[cdn].time = moment.unix(parseInt(time_max)).format("MM-DD HH:mm")
+                            }
+                            res.json(band_max)
                             db.close()
                         }else{
                             res.json({
@@ -410,3 +415,4 @@ exports.complete = complete
 exports.get_time = get_time
 exports.test = test
 exports.cdn_band = cdn_band
+exports.day_max = day_max

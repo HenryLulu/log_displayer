@@ -11,5 +11,6 @@ router.get('/complete_ips',summary.complete)
 router.get('/get_time',summary.get_time)
 router.get('/test',summary.test)
 router.get('/get_cdn_band',summary.cdn_band)
+router.get('/daily_max',summary.day_max)
 
 module.exports = router
