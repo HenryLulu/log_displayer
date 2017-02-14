@@ -147,6 +147,9 @@ var complete = function(req,res){
                         }
                         var back = {
                             s_ip:1,
+                            from:1,
+                            version:1,
+                            md5:1,
                             _id:0
                         }
                         tb.find(query,back).toArray(function(err,logs){
@@ -157,16 +160,18 @@ var complete = function(req,res){
                                 var kw_num = 0;
                                 var dl_num = 0;
                                 var ws_num = 0;
-                                var current;
+                                var current_re;
+                                var current
                                 var ips = ""
                                 for(var l in logs){
-                                    logs[l].s_ip && (ips += (logs[l].s_ip+","))
+                                    logs[l].s_ip && (ips += (logs[l].s_ip+":"+(logs[l].version||"unk")+":"+(logs[l].md5||"unk")+","))
                                 }
                                 var kw_list = ""
                                 for(var i in kw_ips){
-                                    current = kw_ips[i];
-                                    if(ips.indexOf(current)>=0){
-                                        kw_list += "<p style='color: green'>"+current+"</p>"
+                                    current = kw_ips[i]
+                                    current_re = ips.match(new RegExp(kw_ips[i]+":[^:]*:[^:]*,"))
+                                    if(current_re){
+                                        kw_list += "<p style='color: green'>"+current_re[0]+"</p>"
                                         kw_num ++;
                                     }else{
                                         kw_list += "<p style='color: red'>"+current+"</p>"
@@ -176,8 +181,9 @@ var complete = function(req,res){
                                 var dl_list = ""
                                 for(var j in dl_ips){
                                     current = dl_ips[j];
-                                    if(ips.indexOf(current)>=0){
-                                        dl_list += "<p style='color: green'>"+current+"</p>"
+                                    current_re = ips.match(new RegExp(dl_ips[j]+":[^:]*:[^:]*,"))
+                                    if(current_re){
+                                        dl_list += "<p style='color: green'>"+current_re[0]+"</p>"
                                         dl_num ++;
                                     }else{
                                         dl_list += "<p style='color: red'>"+current+"</p>"
@@ -186,9 +192,10 @@ var complete = function(req,res){
                                 dl_list = "<p>[DL total:"+dl_num+"/"+dl_ips.length+"]</p>" + dl_list;
                                 var ws_list = ""
                                 for(var k in ws_ips){
-                                    current = ws_ips[k];
-                                    if(ips.indexOf(current)>=0){
-                                        ws_list += "<p style='color: green'>"+current+"</p>"
+                                    current = ws_ips[k]
+                                    current_re = ips.match(new RegExp(ws_ips[k]+":[^:]*:[^:]*,"))
+                                    if(current_re){
+                                        ws_list += "<p style='color: green'>"+current_re[0]+"</p>"
                                         ws_num ++;
                                     }else{
                                         ws_list += "<p style='color: red'>"+current+"</p>"
