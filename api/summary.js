@@ -409,10 +409,101 @@ var day_max = function(req,res){
         })
     }
 }
+var level_1_2 = function(req,res){
+    try{
+        connect_mongo(res,function(db){
+            db.collection('log_table',function(err,tb){
+                if(!err){
+                    var start;
+                    if(req.query.time){
+                        var req_time = req.query.time
+                        start = parseInt(new Date(
+                                parseInt(req_time.substring(0,4)),
+                                parseInt(req_time.substring(4,6))-1,
+                                parseInt(req_time.substring(6,8)),
+                                parseInt(req_time.substring(8,10)),
+                                parseInt(req_time.substring(10,12)),
+                                0
+                            ).getTime()/1000-3600*8)
+                    }else{
+                        var five_ago = new Date(new Date().getTime()-300000);
+                        start = parseInt(
+                            new Date(five_ago.getFullYear(),five_ago.getMonth(),five_ago.getDate(),five_ago.getHours(),
+                                parseInt(five_ago.getMinutes()/5)*5,0).getTime()/1000
+                        )
+                    }
 
+                    var query = {
+                        'start':start
+                    }
+                    var back = {
+                        from:1,
+                        start:1,
+                        band:1,
+                        s_ip:1,
+                        _id:0
+                    }
+                    var band_collection = {
+                        //"kw":0,
+                        "dl":0,
+                        //"ws":0,
+                        //"kwn":0,
+                        //"dln":0,
+                        //"wsn":0
+                    }
+                    tb.find(query,back).toArray(function(err,logs){
+                        if(!err){
+                            for(var l in logs){
+                                var log = logs[l];
+                                if(log.from&&log.band){
+                                    switch(log.from){
+                                        //case 1:
+                                        //    band_collection.kw += parseInt(log.band);
+                                        //    band_collection.kwn += 1;
+                                        //    break;
+                                        case 2:
+                                            if(config.dl_1_2.search(log.s_ip)!=-1){
+                                            band_collection.dl += parseInt(log.band);
+                                            }
+                                            //band_collection.dln += 1;
+                                            break;
+                                        //case 3:
+                                        //    band_collection.ws += parseInt(log.band);
+                                        //    band_collection.wsn += 1;
+                                        //    break;
+                                    }
+                                }
+                            }
+                            var time = new Date((3600*8+start)*1000)
+                            band_collection.time = time.getHours()+":"+time.getMinutes()
+                            res.json(band_collection)
+                            db.close()
+                        }else{
+                            res.json({
+                                ErrNo:"102",
+                                ErrMsg:"Failed to get logs"
+                            })
+                        }
+                    })
+                }else{
+                    res.json({
+                        ErrNo:"101",
+                        ErrMsg:"Failed to get table"
+                    })
+                }
+            })
+        })
+    }catch(e){
+        res.json({
+            ErrNo:"100",
+            ErrMsg:"数据库错误"
+        })
+    }
+}
 exports.last_five = last_five
 exports.complete = complete
 exports.get_time = get_time
 exports.test = test
 exports.cdn_band = cdn_band
 exports.day_max = day_max
+exports.level_1_2 = level_1_2
