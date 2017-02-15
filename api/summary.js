@@ -154,55 +154,53 @@ var complete = function(req,res){
                         }
                         tb.find(query,back).toArray(function(err,logs){
                             if(!err){
-                                var kw_ips = ip_obj.kw;
-                                var dl_ips = ip_obj.dl;
-                                var ws_ips = ip_obj.ws;
-                                var kw_num = 0;
-                                var dl_num = 0;
-                                var ws_num = 0;
+                                var cdns = {
+                                    kw:{
+                                        list:"",
+                                        ips:ip_obj.kw,
+                                        num:0
+                                    },
+                                    dl:{
+                                        list:"",
+                                        ips:ip_obj.dl,
+                                        num:0
+                                    },
+                                    ws:{
+                                        list:"",
+                                        ips:ip_obj.ws,
+                                        num:0
+                                    },
+                                    pbs:{
+                                        list:"",
+                                        ips:ip_obj.pbs,
+                                        num:0
+                                    },
+                                }
+                                var current_cdn;
                                 var current_re;
-                                var current
+                                var current_ip;
                                 var ips = ""
+                                var total_list = "";
                                 for(var l in logs){
                                     logs[l].s_ip && (ips += (logs[l].s_ip+":"+(logs[l].version||"unk")+":"+(logs[l].md5||"unk")+","))
                                 }
-                                var kw_list = ""
-                                for(var i in kw_ips){
-                                    current = kw_ips[i]
-                                    current_re = ips.match(new RegExp(kw_ips[i]+":[^:]*:[^:]*,"))
-                                    if(current_re){
-                                        kw_list += "<p style='color: green'>"+current_re[0]+"</p>"
-                                        kw_num ++;
-                                    }else{
-                                        kw_list += "<p style='color: red'>"+current+"</p>"
+
+                                for(var cdn_name in cdns){
+                                    current_cdn = cdns[cdn_name];
+                                    for(var i in current_cdn.ips){
+                                        current_ip = current_cdn.ips[i];
+                                        current_re = ips.match(new RegExp(current_ip+":[^:]*:[^:]*,"));
+                                        if(current_re){
+                                            current_cdn.list += "<p style='color: green'>"+current_re[0]+"</p>"
+                                            current_cdn.num ++;
+                                        }else{
+                                            current_cdn.list += "<p style='color: red'>"+current_ip+"</p>"
+                                        }
                                     }
+                                    current_cdn.list = "<p>["+cdn_name+" total:"+current_cdn.num+"/"+current_cdn.ips.length+"]</p>" + current_cdn.list;
+                                    total_list += (current_cdn.list+"<p></p>")
                                 }
-                                kw_list = "<p>[KW total:"+kw_num+"/"+kw_ips.length+"]</p>" + kw_list;
-                                var dl_list = ""
-                                for(var j in dl_ips){
-                                    current = dl_ips[j];
-                                    current_re = ips.match(new RegExp(dl_ips[j]+":[^:]*:[^:]*,"))
-                                    if(current_re){
-                                        dl_list += "<p style='color: green'>"+current_re[0]+"</p>"
-                                        dl_num ++;
-                                    }else{
-                                        dl_list += "<p style='color: red'>"+current+"</p>"
-                                    }
-                                }
-                                dl_list = "<p>[DL total:"+dl_num+"/"+dl_ips.length+"]</p>" + dl_list;
-                                var ws_list = ""
-                                for(var k in ws_ips){
-                                    current = ws_ips[k]
-                                    current_re = ips.match(new RegExp(ws_ips[k]+":[^:]*:[^:]*,"))
-                                    if(current_re){
-                                        ws_list += "<p style='color: green'>"+current_re[0]+"</p>"
-                                        ws_num ++;
-                                    }else{
-                                        ws_list += "<p style='color: red'>"+current+"</p>"
-                                    }
-                                }
-                                ws_list = "<p>[WS total:"+ws_num+"/"+ws_ips.length+"]</p>" + ws_list;
-                                res.send(kw_list+"<p></p>"+dl_list+"<p></p>"+ws_list)
+                                res.send(total_list)
                                 db.close()
                             }else{
                                 res.json({
@@ -272,9 +270,11 @@ var cdn_band = function(req,res){
                         "kw":0,
                         "dl":0,
                         "ws":0,
+                        "pbs":0,
                         "kwn":0,
                         "dln":0,
-                        "wsn":0
+                        "wsn":0,
+                        "pbsn":0
                     }
                     tb.find(query,back).toArray(function(err,logs){
                         if(!err){
@@ -293,6 +293,10 @@ var cdn_band = function(req,res){
                                         case 3:
                                             band_collection.ws += parseInt(log.band);
                                             band_collection.wsn += 1;
+                                            break;
+                                        case 4:
+                                            band_collection.pbs += parseInt(log.band);
+                                            band_collection.pbsn += 1;
                                             break;
                                     }
                                 }
@@ -345,7 +349,8 @@ var day_max = function(req,res){
                     var band_collection = {
                         "kw":{},
                         "dl":{},
-                        "ws":{}
+                        "ws":{},
+                        "pbs":{}
                     }
                     var band_max = {
                         kw:{
@@ -360,6 +365,10 @@ var day_max = function(req,res){
                             band:0,
                             time:""
                         },
+                        pbs:{
+                            band:0,
+                            time:""
+                        },
                     }
                     tb.find(query,back).toArray(function(err,logs){
                         if(!err){
@@ -368,28 +377,34 @@ var day_max = function(req,res){
                                 if(log.from&&log.band){
                                     switch(log.from){
                                         case 1:
+                                            if(!band_collection.kw[log.start]){band_collection.kw[log.start]=0}
                                             band_collection.kw[log.start] += parseInt(log.band);
                                             break;
                                         case 2:
+                                            if(!band_collection.dl[log.start]){band_collection.dl[log.start]=0}
                                             band_collection.dl[log.start] += parseInt(log.band);
                                             break;
                                         case 3:
+                                            if(!band_collection.ws[log.start]){band_collection.ws[log.start]=0}
                                             band_collection.ws[log.start] += parseInt(log.band);
+                                            break;
+                                        case 4:
+                                            if(!band_collection.pbs[log.start]){band_collection.pbs[log.start]=0}
+                                            band_collection.pbs[log.start] += parseInt(log.band);
                                             break;
                                     }
                                 }
                             }
-                            console.log(band_collection.kw)
                             for(var cdn in band_collection){
-                                var band_max = 0,time_max = ""
+                                var band_m = 0,time_max = ""
                                 var current_cdn = band_collection[cdn];
                                 for(var five_min in current_cdn){
-                                    if(current_cdn[five_min]>band_max[cdn]){
-                                        band_max = current_cdn[five_min];
+                                    if(current_cdn[five_min]>band_m){
+                                        band_m = current_cdn[five_min];
                                         time_max = five_min;
                                     }
                                 }
-                                band_max[cdn].band = band_max;
+                                band_max[cdn].band = band_m;
                                 band_max[cdn].time = moment.unix(parseInt(time_max)).format("MM-DD HH:mm")
                             }
                             res.json(band_max)

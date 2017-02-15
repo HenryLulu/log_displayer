@@ -13,6 +13,7 @@ var get = function(cb){
     var kw = []
     var dl = []
     var ws = []
+    var pbs = []
     http.get(config.kw_url,function(res){
         var data = ""
         res.on("data",function(d){
@@ -44,19 +45,31 @@ var get = function(cb){
             ws = []
         } else {
             ws = to_array(stdout)
-            ws = ws.concat(config.pbs_ips);
         }
+    });
+
+    http.get(config.dl_url,function(res){
+        var data = ""
+        res.on("data",function(d){
+            data += d
+        })
+        res.on("end",function(){
+            pbs = to_array(data)
+        })
+    }).on("error", function(e) {
+        pbs = []
     });
 
     var times = 0
     var int = setInterval(function(){
         times ++
-        if((kw.length>0&&dl.length>0&&ws.length>0)||times>50){
+        if((kw.length>0&&dl.length>0&&ws.length>0&&pbs.length>0)||times>50){
             clearInterval(int)
             cb({
                 kw:kw,
                 dl:dl,
-                ws:ws
+                ws:ws,
+                pbs:pbs
             })
         }
     },100)
