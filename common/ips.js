@@ -48,7 +48,7 @@ var get = function(cb){
         }
     });
 
-    http.get(config.dl_url,function(res){
+    http.get(config.pbs_url,function(res){
         var data = ""
         res.on("data",function(d){
             data += d

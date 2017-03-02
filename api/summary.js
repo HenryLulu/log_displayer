@@ -22,17 +22,17 @@ function connect_mongo(res,callback){
     })
 }
 
-var last_five = function(req,res){
+var last_min = function(req,res){
     try{
         connect_mongo(res,function(db){
             db.collection('log_table',function(err,tb){
                 if(!err){
-                    var five_ago = new Date(new Date().getTime()-600000);
-                    var start = parseInt(
-                        new Date(five_ago.getFullYear(),five_ago.getMonth(),five_ago.getDate(),five_ago.getHours(),
-                        parseInt(five_ago.getMinutes()/5)*5,0).getTime()/1000
-                    )
-                    //console.log(start)
+                    var start = moment().subtract(2,"minutes").unix()
+                    //var five_ago = new Date(new Date().getTime()-120000);
+                    //var start = parseInt(
+                    //    new Date(five_ago.getFullYear(),five_ago.getMonth(),five_ago.getDate(),five_ago.getHours(),
+                    //    five_ago.getMinutes(),0).getTime()/1000
+                    //)
 
                     var query = {
                         'start':start
@@ -40,6 +40,7 @@ var last_five = function(req,res){
                     var back = {
                         start:1,
                         s_ip:1,
+                        flu:1,
                         band:1,
                         suc_r:1,
                         freeze_r:1,
@@ -135,11 +136,12 @@ var complete = function(req,res){
             connect_mongo(res,function(db){
                 db.collection('log_table',function(err,tb){
                     if(!err){
-                        var five_ago = new Date(new Date().getTime()-300000);
-                        var start = parseInt(
-                            new Date(five_ago.getFullYear(),five_ago.getMonth(),five_ago.getDate(),five_ago.getHours(),
-                                parseInt(five_ago.getMinutes()/5)*5,0).getTime()/1000
-                        )
+                        var start = moment().subtract(1,"minutes").unix();
+                        //var five_ago = new Date(new Date().getTime()-300000);
+                        //var start = parseInt(
+                        //    new Date(five_ago.getFullYear(),five_ago.getMonth(),five_ago.getDate(),five_ago.getHours(),
+                        //        parseInt(five_ago.getMinutes()/5)*5,0).getTime()/1000
+                        //)
                         //console.log(start)
 
                         var query = {
@@ -250,11 +252,12 @@ var cdn_band = function(req,res){
                                 0
                             ).getTime()/1000-3600*8)
                     }else{
-                        var five_ago = new Date(new Date().getTime()-300000);
-                        start = parseInt(
-                            new Date(five_ago.getFullYear(),five_ago.getMonth(),five_ago.getDate(),five_ago.getHours(),
-                                parseInt(five_ago.getMinutes()/5)*5,0).getTime()/1000
-                        )
+                        start = moment().subtract().unix()
+                        //var five_ago = new Date(new Date().getTime()-300000);
+                        //start = parseInt(
+                        //    new Date(five_ago.getFullYear(),five_ago.getMonth(),five_ago.getDate(),five_ago.getHours(),
+                        //        parseInt(five_ago.getMinutes()/5)*5,0).getTime()/1000
+                        //)
                     }
 
                     var query = {
@@ -333,7 +336,8 @@ var day_max = function(req,res){
         connect_mongo(res,function(db){
             db.collection('log_table',function(err,tb){
                 if(!err){
-                    var date = moment(req.query.date || moment().format('YYYYMMDD'));
+                    var datestr = req.query.date || moment.utc().utcOffset(8).format('YYYYMMDD');
+                    var date = moment.utc(datestr).utcOffset(8);
                     var query = {
                         'start':{
                             '$gte':date.startOf('day').unix(),
@@ -405,7 +409,7 @@ var day_max = function(req,res){
                                     }
                                 }
                                 band_max[cdn].band = band_m;
-                                band_max[cdn].time = moment.unix(parseInt(time_max)).format("MM-DD HH:mm")
+                                band_max[cdn].time = moment.unix(parseInt(time_max)).utc().utcOffset(8).format("MM-DD HH:mm")
                             }
                             res.json(band_max)
                             db.close()
@@ -448,11 +452,12 @@ var level_1_2 = function(req,res){
                                 0
                             ).getTime()/1000-3600*8)
                     }else{
-                        var five_ago = new Date(new Date().getTime()-300000);
-                        start = parseInt(
-                            new Date(five_ago.getFullYear(),five_ago.getMonth(),five_ago.getDate(),five_ago.getHours(),
-                                parseInt(five_ago.getMinutes()/5)*5,0).getTime()/1000
-                        )
+                        start = moment().subtract().unix()
+                        //var five_ago = new Date(new Date().getTime()-300000);
+                        //start = parseInt(
+                        //    new Date(five_ago.getFullYear(),five_ago.getMonth(),five_ago.getDate(),five_ago.getHours(),
+                        //        parseInt(five_ago.getMinutes()/5)*5,0).getTime()/1000
+                        //)
                     }
 
                     var query = {
@@ -522,7 +527,7 @@ var level_1_2 = function(req,res){
         })
     }
 }
-exports.last_five = last_five
+exports.last_five = last_min
 exports.complete = complete
 exports.get_time = get_time
 exports.test = test
