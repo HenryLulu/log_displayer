@@ -27,7 +27,7 @@ var last_min = function(req,res){
         connect_mongo(res,function(db){
             db.collection('log_table',function(err,tb){
                 if(!err){
-                    var start = moment().subtract(2,"minutes").unix()
+                    var start = moment().subtract(2,"minutes").startOf('minute').unix()
                     //var five_ago = new Date(new Date().getTime()-120000);
                     //var start = parseInt(
                     //    new Date(five_ago.getFullYear(),five_ago.getMonth(),five_ago.getDate(),five_ago.getHours(),
@@ -136,7 +136,7 @@ var complete = function(req,res){
             connect_mongo(res,function(db){
                 db.collection('log_table',function(err,tb){
                     if(!err){
-                        var start = moment().subtract(1,"minutes").unix();
+                        var start = moment().subtract(2,"minutes").startOf('minute').unix();
                         //var five_ago = new Date(new Date().getTime()-300000);
                         //var start = parseInt(
                         //    new Date(five_ago.getFullYear(),five_ago.getMonth(),five_ago.getDate(),five_ago.getHours(),
@@ -252,7 +252,7 @@ var cdn_band = function(req,res){
                                 0
                             ).getTime()/1000-3600*8)
                     }else{
-                        start = moment().subtract().unix()
+                        start = moment().subtract(1,"minutes").startOf('minute').unix()
                         //var five_ago = new Date(new Date().getTime()-300000);
                         //start = parseInt(
                         //    new Date(five_ago.getFullYear(),five_ago.getMonth(),five_ago.getDate(),five_ago.getHours(),
@@ -452,7 +452,7 @@ var level_1_2 = function(req,res){
                                 0
                             ).getTime()/1000-3600*8)
                     }else{
-                        start = moment().subtract().unix()
+                        start = moment().subtract(1,"minutes").startOf('minute').unix()
                         //var five_ago = new Date(new Date().getTime()-300000);
                         //start = parseInt(
                         //    new Date(five_ago.getFullYear(),five_ago.getMonth(),five_ago.getDate(),five_ago.getHours(),
