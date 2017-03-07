@@ -8,3 +8,5 @@ files/
 logs/
 .DS_Store
 public/
+.vscode
+test_*
