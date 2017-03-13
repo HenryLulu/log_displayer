@@ -25,7 +25,7 @@ function connect_mongo(res,callback){
 var last_min = function(req,res){
     try{
         connect_mongo(res,function(db){
-            db.collection('log_table',function(err,tb){
+            db.collection('ori_node',function(err,tb){
                 if(!err){
                     var start = moment().subtract(2,"minutes").startOf('minute').unix()
                     //var five_ago = new Date(new Date().getTime()-120000);
@@ -77,7 +77,7 @@ var last_min = function(req,res){
 var get_time = function(req,res){
     try{
         connect_mongo(res,function(db){
-            db.collection('log_table',function(err,tb){
+            db.collection('ori_node',function(err,tb){
                 if(!err){
                     //var start = parseInt(req.query.time)
                     var time = req.query.time || "201701010000"
@@ -134,7 +134,7 @@ var complete = function(req,res){
     ips.get(function(ip_obj){
         try{
             connect_mongo(res,function(db){
-                db.collection('log_table',function(err,tb){
+                db.collection('ori_node',function(err,tb){
                     if(!err){
                         var start = moment().subtract(2,"minutes").startOf('minute').unix();
                         //var five_ago = new Date(new Date().getTime()-300000);
@@ -238,7 +238,7 @@ var test = function(req,res){
 var cdn_band = function(req,res){
     try{
         connect_mongo(res,function(db){
-            db.collection('log_table',function(err,tb){
+            db.collection('ori_node',function(err,tb){
                 if(!err){
                     var start;
                     if(req.query.time){
@@ -334,7 +334,7 @@ var cdn_band = function(req,res){
 var day_max = function(req,res){
     try{
         connect_mongo(res,function(db){
-            db.collection('log_table',function(err,tb){
+            db.collection('ori_node',function(err,tb){
                 if(!err){
                     var datestr = req.query.date || moment.utc().utcOffset(8).format('YYYYMMDD');
                     var date = moment.utc(datestr).utcOffset(8);
@@ -438,7 +438,7 @@ var day_max = function(req,res){
 var level_1_2 = function(req,res){
     try{
         connect_mongo(res,function(db){
-            db.collection('log_table',function(err,tb){
+            db.collection('ori_node',function(err,tb){
                 if(!err){
                     var start;
                     if(req.query.time){
