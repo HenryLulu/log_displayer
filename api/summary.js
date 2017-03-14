@@ -437,7 +437,7 @@ var day_max = function(req,res){
 }
 var level_1_2 = function(req,res){
     try{
-        //
+        
         connect_mongo(res,function(db){
             db.collection('ori_node',function(err,tb){
                 if(!err){
